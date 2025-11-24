@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woosik Jung - Portfolio</title>
+    
+    <!-- Tailwind CSS (스타일링) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (리액트 엔진) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (JSX 변환기) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- FontAwesome (아이콘 대체) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 커스텀 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.7; transform: scale(1.05) translateY(10px); }
+            50% { opacity: 0.4; transform: scale(1) translateY(0); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 4s infinite;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 아이콘 컴포넌트 (FontAwesome 사용) ---
+        const IconWrapper = ({ icon, className, size = 24, onClick }) => (
+            <i className={`fa-solid fa-${icon} ${className}`} style={{ fontSize: size, cursor: onClick ? 'pointer' : 'inherit' }} onClick={onClick}></i>
+        );
+
+        const Mail = (props) => <IconWrapper icon="envelope" {...props} />;
+        const Phone = (props) => <IconWrapper icon="phone" {...props} />;
+        const MapPin = (props) => <IconWrapper icon="map-marker-alt" {...props} />;
+        const ChevronDown = (props) => <IconWrapper icon="chevron-down" {...props} />;
+        const Award = (props) => <IconWrapper icon="award" {...props} />;
+        const TrendingUp = (props) => <IconWrapper icon="arrow-trend-up" {...props} />;
+        const Users = (props) => <IconWrapper icon="users" {...props} />;
+        const Briefcase = (props) => <IconWrapper icon="briefcase" {...props} />;
+        const GraduationCap = (props) => <IconWrapper icon="graduation-cap" {...props} />;
+        const Globe = (props) => <IconWrapper icon="globe" {...props} />;
+        const ArrowRight = (props) => <IconWrapper icon="arrow-right" {...props} />;
+        const Menu = (props) => <IconWrapper icon="bars" {...props} />;
+        const X = (props) => <IconWrapper icon="xmark" {...props} />;
+        const Check = (props) => <IconWrapper icon="check" {...props} />;
+        const MessageCircle = (props) => <IconWrapper icon="comment-dots" {...props} />;
+        const Send = (props) => <IconWrapper icon="paper-plane" {...props} />;
+        const Sparkles = (props) => <IconWrapper icon="wand-magic-sparkles" {...props} />;
+        const Loader = (props) => <IconWrapper icon="spinner" className="fa-spin" {...props} />;
+
+
+        // --- 데이터 및 번역 ---
+        const translations = {
+            en: {
+                nav: { about: 'About', expertise: 'Expertise', experience: 'Experience', contact: 'Contact' },
+                hero: { badge: 'General Manager & Pharma Executive', titlePrefix: 'WOOSIK', titleSuffix: 'JUNG', subtitle: 'Driving growth and innovation in healthcare.', subtitle2: 'Connecting global strategies with local market dominance.', ctaContact: 'Contact Me', ctaCareer: 'View Career Journey' },
+                stats: [
+                    { label: "Sales Increase (Yondelis)", value: "3X" },
+                    { label: "Revenue in 6 Months", value: "$20M" },
+                    { label: "Years Experience", value: "20+", details: [{ name: "Sanofi", time: "11 yrs" }, { name: "BMS", time: "2 yrs" }, { name: "TTY", time: "8.5 yrs" }] },
+                    { label: "KOLs Secured", value: "100+", details: [{ name: "Oncology" }, { name: "Cardiology" }, { name: "Gynecology" }, { name: "Hepatology" }, { name: "Neurology" }] },
+                ],
+                about: { titlePrefix: 'Bridging Science &', titleSuffix: 'Business Success', desc1: 'Expert in establishing local subsidiaries and leveraging expertise in Sales, MKT, BD, and MA within Multi-National Corporations. Proven track record in leading market access for rare Cancers, Hepatitis C, and Cardiovascular diseases.', desc2: 'A leader who connects the EU, US, and Asia, achieving business growth by diversifying pipelines through open innovation and strategic partnerships.', coreCompetenciesTitle: 'Core Competencies', skills: ["Cross-functional Leadership", "Market Access Strategy", "Oncology & Rare Diseases", "Business Development (BD)", "P&L Management", "Open Innovation", "Hepatitis C & Cardiology", "Strategic Partnerships"] },
+                experience: {
+                    title: 'Professional Journey',
+                    jobs: [
+                        { role: "General Manager", company: "TTY Biopharm Korea", period: "Dec 2016 - May 2025", description: "Led company growth initiatives and comprehensively oversaw all operations, including full P&L ownership. Executed long-term strategic plans and proactively identified new growth opportunities.", achievements: ["Established the Korean subsidiary by obtaining full approval from shareholders.", "Achieved 3X sales increase in Yondelis, securing 100+ KOLs in Oncology and Gynecology.", "Exceeded budgeted EBIT by surpassing top-line sales targets with cost efficiency.", "Reached key milestones in Market Access through successful KOL engagement."] },
+                        { role: "Marketing Lead", company: "Bristol-Myers Squibb Korea", period: "Sep 2014 - Jun 2016", description: "Successfully launched a first-in-class Hepatitis C drug with a robust framework. Built strategic relationships with key medical societies.", achievements: ["Recorded ~$20M revenue in 6 months post-P&R, winning Global Best Practice Award.", "Achieved P&R approval in 3 months with innovative strategies.", "Established NS5A biomarker test system overcoming regulatory hurdles."] },
+                        { role: "Sr. Marketing PM", company: "Sanofi Korea", period: "Oct 2010 - Aug 2014", description: "Established multi-brand strategies for Plavix, Clexane, and Multaq. Led large-scale marketing programs and cross-functional teams.", achievements: ["Succeeded in Plavix re-positioning, achieving 2X growth vs. market.", "Launched Plavix digital application and played a key role in digital projects.", "Led Plavix Joint Venture meetings engaging top management of Sanofi and BMS."] },
+                        { role: "BD Analyst & Sales Rep", company: "Sanofi Korea", period: "Nov 2003 - Sep 2010", description: "Defined strategic direction for Sanofi Korea assets. Identified new business opportunities through in-licensing deals.", achievements: ["Analyzed 50+ in-licensing opportunities from global/regional markets.", "Recorded 2X sales growth in 2007 vs 2006 at Eulji University Hospital.", "Appointed as sales rep in charge of top-tier hospitals (Samsung Medical, Severance)."] }
+                    ]
+                },
+                education: { title: 'Education & Certifications', items: [{ degree: "Bachelor's Degree", school: "Sogang University", major: "Chemistry and Physics", period: "1994 - 1998" }, { degree: "On-line MBA", school: "Sogang University", major: "Certified", period: "2006 - 2007" }, { degree: "Clinical Pharmacy", school: "Seoul National Univ.", major: "Certified Program", period: "2009 - 2010" }] },
+                contact: { title: "Let's Connect", desc: "Experienced in leading cross-functional teams and driving business growth in the pharmaceutical industry. Open to strategic partnerships and opportunities.", labels: { email: "Email", phone: "Phone", location: "Location" } }
+            },
+            ko: {
+                nav: { about: '소개', expertise: '핵심역량', experience: '경력기술', contact: '연락처' },
+                hero: { badge: 'General Manager & Pharma Executive', titlePrefix: '정', titleSuffix: '우식', subtitle: '헬스케어 산업의 혁신과 성장을 주도합니다.', subtitle2: '글로벌 전략과 로컬 시장의 지배력을 연결하는 비즈니스 리더.', ctaContact: '연락하기', ctaCareer: '경력 자세히 보기' },
+                stats: [
+                    { label: "Yondelis 매출 성장", value: "3배" },
+                    { label: "6개월 내 매출 달성", value: "$20M" },
+                    { label: "업계 경력", value: "20년+", details: [{ name: "사노피", time: "11년" }, { name: "비엠에스", time: "2년" }, { name: "TTY", time: "8.5년" }] },
+                    { label: "KOL 네트워크", value: "100명+", details: [{ name: "종양내과 (Oncology)" }, { name: "순환기내과 (Cardiology)" }, { name: "산부인과 (Gynecology)" }, { name: "소화기내과 (Hepatology)" }, { name: "신경과 (Neurology)" }] },
+                ],
+                about: { titlePrefix: '과학적 전문성과', titleSuffix: '비즈니스 성공의 결합', desc1: '다국적 기업에서 영업, 마케팅, BD, MA 등 전방위적 경험을 쌓으며, 희귀암, C형 간염, 심혈관 질환 분야의 시장 진입(Market Access)을 성공적으로 이끌어왔습니다.', desc2: '유럽, 미국, 아시아의 다양한 인재들과 협업하며 오픈 이노베이션과 전략적 파트너십을 통해 비즈니스 성장을 견인하는 리더입니다.', coreCompetenciesTitle: '핵심 역량', skills: ["다기능 팀 리더십", "마켓 액세스 전략", "항암 & 희귀질환", "사업 개발 (BD)", "손익(P&L) 관리", "오픈 이노베이션", "간염 & 심혈관 질환", "전략적 파트너십"] },
+                experience: {
+                    title: '경력 사항',
+                    jobs: [
+                        { role: "General Manager (대표)", company: "TTY Biopharm Korea", period: "2016.12 - 2025.05", description: "한국 법인 설립을 주도하고 P&L에 대한 완전한 오너십을 가지고 운영을 총괄했습니다. 장기 전략을 실행하고 신규 성장 기회를 발굴했습니다.", achievements: ["주주 및 이사회의 전폭적인 승인을 얻어 한국 법인 설립 성공.", "희귀 항암제 Yondelis의 매출 3배 성장 달성 및 100명 이상의 KOL 확보.", "비용 효율적인 운영으로 매출 목표 달성 및 예산 대비 EBIT 초과 달성.", "성공적인 KOL 인게이지먼트를 통해 마켓 액세스 주요 마일스톤 달성."] },
+                        { role: "Marketing Lead", company: "Bristol-Myers Squibb Korea", period: "2014.09 - 2016.06", description: "First-in-class C형 간염 치료제의 성공적인 런칭을 이끌었으며, 주요 의학회와 전략적 관계를 구축했습니다.", achievements: ["급여 등재 후 6개월 만에 약 2천만 달러 매출 기록 (Global Best Practice 수상).", "혁신적인 약가 전략으로 허가 3개월 만에 급여 등재 성공.", "규제 장벽을 극복하고 NS5A 바이오마커 테스트 시스템 구축."] },
+                        { role: "Sr. Marketing PM", company: "Sanofi Korea", period: "2010.10 - 2014.08", description: "Plavix, Clexane, Multaq 등 주요 브랜드 전략을 수립하고 대규모 마케팅 프로그램 및 다기능 팀을 리드했습니다.", achievements: ["Plavix 리포지셔닝 성공으로 시장 대비 2배 성장 달성.", "Plavix 디지털 애플리케이션 런칭 및 디지털 프로젝트 주도.", "Sanofi와 BMS 경영진이 참여하는 Plavix 조인트 벤처 회의 주관."] },
+                        { role: "BD Analyst & Sales Rep", company: "Sanofi Korea", period: "2003.11 - 2010.09", description: "Sanofi Korea의 전략적 방향성을 정의하고 라이선싱 딜을 통해 신규 사업 기회를 발굴했습니다.", achievements: ["글로벌/리전 마켓의 50개 이상의 라이선싱 기회 분석.", "을지대학병원 담당 시 전년 대비 2배 매출 성장 기록 (2007).", "국내 최고 병원인 삼성서울병원 및 세브란스병원 담당 영업 대표 역임."] }
+                    ]
+                },
+                education: { title: '학력 및 자격', items: [{ degree: "학사 (Bachelor's Degree)", school: "서강대학교", major: "화학 & 물리학", period: "1994 - 1998" }, { degree: "온라인 MBA", school: "서강대학교", major: "수료", period: "2006 - 2007" }, { degree: "임상 약학 과정", school: "서울대학교", major: "수료", period: "2009 - 2010" }] },
+                contact: { title: "연락하기", desc: "제약 산업에서 비즈니스 성장을 이끌고 다기능 팀을 리드한 경험이 있습니다. 새로운 전략적 파트너십과 기회에 열려 있습니다.", labels: { email: "이메일", phone: "연락처", location: "위치" } }
+            },
+            zh: {
+                nav: { about: '关于', expertise: '专长', experience: '工作经历', contact: '联系方式' },
+                hero: { badge: '总经理 & 医药高管', titlePrefix: 'WOOSIK', titleSuffix: 'JUNG', subtitle: '推动医疗行业的增长与创新。', subtitle2: '将全球战略与本地市场优势相结合。', ctaContact: '联系我', ctaCareer: '查看职业历程' },
+                stats: [
+                    { label: "销售增长 (Yondelis)", value: "3倍" },
+                    { label: "6个月内营收", value: "$20M" },
+                    { label: "行业经验", value: "20年+", details: [{ name: "Sanofi", time: "11年" }, { name: "BMS", time: "2年" }, { name: "TTY", time: "8.5年" }] },
+                    { label: "KOL 资源", value: "100+", details: [{ name: "肿瘤科 (Oncology)" }, { name: "心脏科 (Cardiology)" }, { name: "妇科 (Gynecology)" }, { name: "肝病科 (Hepatology)" }, { name: "神经科 (Neurology)" }] },
+                ],
+                about: { titlePrefix: '连接科学与', titleSuffix: '商业成功', desc1: '在跨国公司拥有丰富的销售、市场营销、业务拓展(BD)和市场准入(MA)经验，擅长建立本地子公司。在罕见癌症、丙型肝炎和心血管疾病的市场准入方面拥有卓越的记录。', desc2: '连接欧洲、美国和亚洲的领导者，通过开放式创新和战略合作伙伴关系实现业务多元化增长。', coreCompetenciesTitle: '核心竞争力', skills: ["跨职能领导力", "市场准入战略", "肿瘤学 & 罕见病", "业务拓展 (BD)", "损益 (P&L) 管理", "开放式创新", "丙型肝炎 & 心脏病学", "战略合作伙伴关系"] },
+                experience: {
+                    title: '职业历程',
+                    jobs: [
+                        { role: "总经理", company: "TTY Biopharm Korea", period: "2016.12 - 2025.05", description: "领导公司增长计划，全面监督包括全盘损益(P&L)在内的所有运营。执行长期战略计划并主动识别新的增长机会。", achievements: ["获得股东完全批准，成功建立韩国子公司。", "罕见癌症药物 Yondelis 销售额增长3倍，确保了100多位肿瘤科和妇科KOL。", "通过成本效益运营超过营收目标，EBIT 超出预算。", "通过成功的 KOL 互动达到市场准入的关键里程碑。"] },
+                        { role: "营销负责人", company: "Bristol-Myers Squibb Korea", period: "2014.09 - 2016.06", description: "成功推出首创的丙型肝炎药物。与主要医学协会建立牢固的战略关系。", achievements: ["报销后6个月内录得约2000万美元营收，荣获全球最佳实践奖。", "凭借创新的定价策略，在获批后3个月内以前所未有的速度获得报销批准。", "克服各种监管障碍，建立了 NS5A 生物标志物测试系统。"] },
+                        { role: "高级营销项目经理", company: "Sanofi Korea", period: "2010.10 - 2014.08", description: "为 Plavix, Clexane 和 Multaq 制定多品牌战略。领导大规模营销计划和跨职能团队。", achievements: ["成功重新定位 Plavix，实现市场对比2倍增长。", "推出 Plavix 数字应用并在赛诺菲数字项目中发挥关键作用。", "主持 Plavix 合资会议，赛诺菲和 BMS 高层管理人员参与。"] },
+                        { role: "BD Analyst & 医药代表", company: "Sanofi Korea", period: "2003.11 - 2010.09", description: "定义 Sanofi Korea 资产的战略方向。通过许可交易识别新的商业机会。", achievements: ["分析了来自全球/区域市场的50多个许可机会。", "2007年在乙支大学医院录得比2006年2倍的销售增长。", "被任命为负责韩国顶级医院（三星医疗中心和 Severance）的销售代表。"] }
+                    ]
+                },
+                education: { title: '教育背景', items: [{ degree: "学士学位", school: "西江大学 (Sogang Univ.)", major: "化学与物理", period: "1994 - 1998" }, { degree: "在线 MBA", school: "西江大学 (Sogang Univ.)", major: "结业", period: "2006 - 2007" }, { degree: "临床药学", school: "首尔国立大学 (SNU)", major: "认证课程", period: "2009 - 2010" }] },
+                contact: { title: "联系方式", desc: "在制药行业拥有领导跨职能团队和推动业务增长的丰富经验。期待战略合作伙伴关系与机会。", labels: { email: "邮箱", phone: "电话", location: "地址" } }
+            },
+            es: {
+                nav: { about: 'Sobre mí', expertise: 'Experiencia', experience: 'Trayectoria', contact: 'Contacto' },
+                hero: { badge: 'Gerente General y Ejecutivo Farmacéutico', titlePrefix: 'WOOSIK', titleSuffix: 'JUNG', subtitle: 'Impulsando el crecimiento y la innovación en la salud.', subtitle2: 'Conectando estrategias globales con el dominio del mercado local.', ctaContact: 'Contáctame', ctaCareer: 'Ver Trayectoria' },
+                stats: [
+                    { label: "Aumento de Ventas (Yondelis)", value: "3X" },
+                    { label: "Ingresos en 6 Meses", value: "$20M" },
+                    { label: "Años de Experiencia", value: "20+", details: [{ name: "Sanofi", time: "11 años" }, { name: "BMS", time: "2 años" }, { name: "TTY", time: "8.5 años" }] },
+                    { label: "KOLs Asegurados", value: "100+", details: [{ name: "Oncología" }, { name: "Cardiología" }, { name: "Ginecología" }, { name: "Hepatología" }, { name: "Neurología" }] },
+                ],
+                about: { titlePrefix: 'Uniendo Ciencia y', titleSuffix: 'Éxito Empresarial', desc1: 'Experto en establecer subsidiarias locales y aprovechar la experiencia en Ventas, MKT, BD y MA en corporaciones multinacionales. Historial comprobado liderando el acceso al mercado para cánceres raros, hepatitis C y enfermedades cardiovasculares.', desc2: 'Un líder que conecta la UE, EE. UU. y Asia, logrando crecimiento empresarial diversificando carteras a través de innovación abierta y asociaciones estratégicas.', coreCompetenciesTitle: 'Competencias Clave', skills: ["Liderazgo Multifuncional", "Estrategia de Acceso al Mercado", "Oncología y Enfermedades Raras", "Desarrollo de Negocios (BD)", "Gestión de P&L", "Innovación Abierta", "Hepatitis C y Cardiología", "Asociaciones Estratégicas"] },
+                experience: {
+                    title: 'Trayectoria Profesional',
+                    jobs: [
+                        { role: "Gerente General", company: "TTY Biopharm Korea", period: "Dic 2016 - May 2025", description: "Lideré iniciativas de crecimiento y supervisé todas las operaciones, incluida la propiedad total de P&L. Ejecuté planes estratégicos a largo plazo e identifiqué nuevas oportunidades de crecimiento.", achievements: ["Establecí la subsidiaria coreana obteniendo la aprobación total de los accionistas.", "Logré un aumento de ventas de 3X en Yondelis, asegurando más de 100 KOLs en Oncología y Ginecología.", "Superé el EBIT presupuestado sobrepasando los objetivos de ventas con eficiencia de costos.", "Alcancé hitos clave en Acceso al Mercado a través de una exitosa participación de KOL."] },
+                        { role: "Líder de Marketing", company: "Bristol-Myers Squibb Korea", period: "Sep 2014 - Jun 2016", description: "Lancé con éxito un medicamento de primera clase para la Hepatitis C. Construí relaciones estratégicas con sociedades médicas clave.", achievements: ["Registré ~$20M en ingresos en 6 meses post-reembolso, ganando el Premio Global a la Mejor Práctica.", "Logré la aprobación de reembolso en 3 meses con estrategias innovadoras.", "Establecí el sistema de prueba de biomarcadores NS5A superando obstáculos regulatorios."] },
+                        { role: "Gerente de Marketing Sr.", company: "Sanofi Korea", period: "Oct 2010 - Ago 2014", description: "Establecí estrategias multimarca para Plavix, Clexane y Multaq. Lideré programas de marketing a gran escala y equipos multifuncionales.", achievements: ["Éxito en el reposicionamiento de Plavix, logrando un crecimiento de 2X frente al mercado.", "Lancé la aplicación digital de Plavix y jugué un papel clave en proyectos digitales.", "Lideré reuniones de Joint Venture de Plavix involucrando a la alta dirección de Sanofi y BMS."] },
+                        { role: "Analista de BD y Representante de Ventas", company: "Sanofi Korea", period: "Nov 2003 - Sep 2010", description: "Definí la dirección estratégica para los activos de Sanofi Korea. Identifiqué nuevas oportunidades de negocio a través de acuerdos de licencia.", achievements: ["Analicé más de 50 oportunidades de licencia de mercados globales/regionales.", "Registré un crecimiento de ventas de 2X en 2007 vs 2006 en el Hospital Universitario Eulji.", "Nombrado representante de ventas a cargo de hospitales de primer nivel (Centro Médico Samsung, Severance)."] }
+                    ]
+                },
+                education: { title: 'Educación y Certificaciones', items: [{ degree: "Licenciatura", school: "Universidad Sogang", major: "Química y Física", period: "1994 - 1998" }, { degree: "MBA Online", school: "Universidad Sogang", major: "Certificado", period: "2006 - 2007" }, { degree: "Farmacia Clínica", school: "Univ. Nacional de Seúl", major: "Programa Certificado", period: "2009 - 2010" }] },
+                contact: { title: "Conectemos", desc: "Experiencia liderando equipos multifuncionales e impulsando el crecimiento empresarial en la industria farmacéutica. Abierto a asociaciones estratégicas y oportunidades.", labels: { email: "Correo", phone: "Teléfono", location: "Ubicación" } }
+            }
+        };
+
+        // --- Gemini AI Chat 컴포넌트 ---
+        const GeminiChat = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                { role: 'assistant', text: 'Hello! I am Woosik\'s AI Assistant. Ask me anything about his career, achievements, or expertise.' }
+            ]);
+            const [inputText, setInputText] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages, isOpen]);
+
+            const handleSend = async () => {
+                if (!inputText.trim()) return;
+
+                const userMessage = inputText;
+                setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+                setInputText('');
+                setIsLoading(true);
+
+                try {
+                    const contextData = JSON.stringify(translations.en);
+                    const systemPrompt = `
+                        You are an AI assistant for the portfolio website of Woosik Jung, a Pharmaceutical Executive.
+                        Your role is to answer visitor questions about Woosik's career, skills, and achievements based STRICTLY on the provided context.
+                        
+                        Context Data (Woosik's Resume):
+                        ${contextData}
+
+                        Instructions:
+                        1. Answer professionally, concisely, and politely.
+                        2. If the answer is not in the context data, say "I don't have that information in my current records, but you can contact Woosik directly for more details."
+                        3. Highlight key achievements (numbers, awards) when relevant.
+                        4. Respond in the same language the user asks in. If unsure, default to English.
+                    `;
+
+                    const apiKey = ""; // 여기에 API Key를 입력하거나, 서버를 통해 호출해야 합니다.
+                    
+                    // 클라이언트 사이드에서 직접 호출은 보안상 권장되지 않지만, 단일 파일 데모를 위해 유지합니다. 
+                    // 실제 사용시 API Key가 필요합니다.
+                    if (!apiKey) {
+                        setTimeout(() => {
+                             setMessages(prev => [...prev, { role: 'assistant', text: "API Key가 설정되지 않았습니다. 코드 내의 apiKey 변수에 Gemini API Key를 입력해주세요." }]);
+                             setIsLoading(false);
+                        }, 1000);
+                        return;
+                    }
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: userMessage }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+
+                    const data = await response.json();
+                    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I'm having trouble connecting right now.";
+
+                    setMessages(prev => [...prev, { role: 'assistant', text: aiResponse }]);
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, I encountered an error. Please check your connection and try again." }]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') handleSend();
+            };
+
+            return (
+                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+                    {isOpen && (
+                        <div className="mb-4 w-[350px] h-[500px] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
+                            <div className="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles size={18} className="text-emerald-400" />
+                                    <span className="text-white font-semibold">AI Assistant</span>
+                                </div>
+                                <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900/95">
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-emerald-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700'}`}>
+                                            {msg.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                {isLoading && (
+                                    <div className="flex justify-start">
+                                        <div className="bg-slate-800 p-3 rounded-2xl rounded-bl-none border border-slate-700 flex items-center gap-2">
+                                            <Loader size={16} className="animate-spin text-emerald-400" />
+                                            <span className="text-slate-400 text-xs">Thinking...</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+                            <div className="p-3 bg-slate-800 border-t border-slate-700 flex gap-2">
+                                <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyPress={handleKeyPress} placeholder="Ask about Woosik..." className="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-slate-500" />
+                                <button onClick={handleSend} disabled={isLoading || !inputText.trim()} className="p-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <Send size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <button onClick={() => setIsOpen(!isOpen)} className={`p-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${isOpen ? 'bg-slate-800 text-white rotate-90' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-110'}`}>
+                        {isOpen ? <X size={24} /> : <MessageCircle size={28} />}
+                    </button>
+                </div>
+            );
+        };
+
+        // --- 메인 컴포넌트 ---
+        const RevealOnScroll = ({ children, delay = 0 }) => {
+            const [isVisible, setIsVisible] = useState(false);
+            const ref = useRef(null);
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) { setIsVisible(true); observer.unobserve(entry.target); }
+                }, { threshold: 0.1 });
+                if (ref.current) observer.observe(ref.current);
+                return () => { if (ref.current) observer.unobserve(ref.current); };
+            }, []);
+            return (
+                <div ref={ref} className={`transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: `${delay}ms` }}>
+                    {children}
+                </div>
+            );
+        };
+
+        const LanguageSwitcher = ({ currentLang, setLang }) => {
+            const languages = [{ code: 'en', label: 'English' }, { code: 'ko', label: '한국어' }, { code: 'zh', label: '中文' }, { code: 'es', label: 'Español' }];
+            return (
+                <div className="flex items-center space-x-1 bg-slate-800/50 rounded-lg p-1 border border-slate-700">
+                    {languages.map((lang) => (
+                        <button key={lang.code} onClick={() => setLang(lang.code)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${currentLang === lang.code ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>
+                            {lang.label}
+                        </button>
+                    ))}
+                </div>
+            );
+        };
+
+        const Navbar = ({ lang, setLang, t }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+            const navLinks = [{ name: t.nav.about, href: '#about' }, { name: t.nav.expertise, href: '#expertise' }, { name: t.nav.experience, href: '#experience' }, { name: t.nav.contact, href: '#contact' }];
+            return (
+                <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/90 backdrop-blur-md shadow-lg py-4' : 'bg-transparent py-6'}`}>
+                    <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                        <a href="#" className="text-2xl font-bold tracking-tighter text-white">WJ<span className="text-emerald-400">.</span></a>
+                        <div className="hidden md:flex items-center space-x-8">
+                            {navLinks.map((link) => <a key={link.name} href={link.href} className="text-sm font-medium text-slate-300 hover:text-emerald-400 transition-colors uppercase tracking-widest">{link.name}</a>)}
+                            <div className="pl-4 border-l border-slate-700"><LanguageSwitcher currentLang={lang} setLang={setLang} /></div>
+                        </div>
+                        <div className="md:hidden flex items-center gap-4">
+                            <LanguageSwitcher currentLang={lang} setLang={setLang} />
+                            <button onClick={() => setIsOpen(!isOpen)} className="text-white focus:outline-none">{isOpen ? <X size={24} /> : <Menu size={24} />}</button>
+                        </div>
+                    </div>
+                    {isOpen && (
+                        <div className="md:hidden bg-slate-900 border-t border-slate-800 absolute w-full">
+                            <div className="flex flex-col px-6 py-4 space-y-4">
+                                {navLinks.map((link) => <a key={link.name} href={link.href} onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-emerald-400 text-lg font-medium">{link.name}</a>)}
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            );
+        };
+
+        const Hero = ({ t }) => {
+            return (
+                <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 pt-20 md:pt-0">
+                    <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse"></div>
+                    <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]"></div>
+                    <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                            <div className="text-center md:text-left order-2 md:order-1">
+                                <RevealOnScroll>
+                                    <div className="inline-block px-4 py-2 mb-6 border border-emerald-500/30 rounded-full bg-emerald-500/5 backdrop-blur-sm">
+                                        <span className="text-emerald-400 text-sm font-semibold tracking-widest uppercase">{t.hero.badge}</span>
+                                    </div>
+                                </RevealOnScroll>
+                                <RevealOnScroll delay={200}>
+                                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-tight">
+                                        {t.hero.titlePrefix} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">{t.hero.titleSuffix}</span>
+                                    </h1>
+                                </RevealOnScroll>
+                                <RevealOnScroll delay={400}>
+                                    <p className="text-xl text-slate-400 max-w-xl mx-auto md:mx-0 mb-10 font-light leading-relaxed">
+                                        {t.hero.subtitle} <br className="hidden lg:block" />
+                                        {t.hero.subtitle2}
+                                    </p>
+                                </RevealOnScroll>
+                                <RevealOnScroll delay={600}>
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                                        <a href="#contact" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                                            {t.hero.ctaContact} <ArrowRight size={18} />
+                                        </a>
+                                        <a href="#experience" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all border border-slate-700 flex items-center justify-center">
+                                            {t.hero.ctaCareer}
+                                        </a>
+                                    </div>
+                                </RevealOnScroll>
+                            </div>
+                            <div className="relative order-1 md:order-2 flex justify-center md:justify-end md:translate-x-0">
+                                <RevealOnScroll delay={300}>
+                                    <div className="relative w-[300px] md:w-[400px] aspect-square mx-auto md:mr-auto lg:mr-20">
+                                        <div className="absolute inset-0 bg-white/20 blur-[60px] rounded-full scale-105 animate-pulse-slow"></div>
+                                        <div className="relative z-10 w-full h-full rounded-full bg-white shadow-2xl p-4 flex items-center justify-center">
+                                            <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-100">
+                                                {/* 이미지 파일명을 정확히 입력하세요 */}
+                                                <img src="./image_82fe5c.jpg" alt="Woosik Jung" className="w-full h-full object-cover object-top transform hover:scale-105 transition-transform duration-700" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </RevealOnScroll>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-slate-500 hidden md:block">
+                        <ChevronDown size={32} />
+                    </div>
+                </section>
+            );
+        };
+
+        const Stats = ({ t }) => {
+            const icons = ['arrow-trend-up', 'award', 'briefcase', 'users'];
+            const colors = ["text-emerald-400", "text-blue-400", "text-purple-400", "text-amber-400"];
+            const [activeStatIndex, setActiveStatIndex] = useState(null);
+
+            return (
+                <section className="py-20 bg-slate-900 border-b border-slate-800">
+                    <div className="max-w-7xl mx-auto px-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {t.stats.map((stat, index) => {
+                                const isInteractive = !!stat.details;
+                                const isActive = activeStatIndex === index;
+                                return (
+                                    <RevealOnScroll key={index} delay={index * 100}>
+                                        <div 
+                                            role={isInteractive ? "button" : "status"} 
+                                            tabIndex={isInteractive ? 0 : -1}
+                                            className={`p-6 rounded-2xl bg-slate-800/50 border transition-all h-full min-h-[160px] flex flex-col justify-between touch-manipulation ${isInteractive ? 'cursor-pointer hover:bg-slate-800 active:scale-95' : 'cursor-default'} ${isActive ? 'border-emerald-500 ring-1 ring-emerald-500/50' : 'border-slate-700 hover:border-slate-600 hover:transform hover:-translate-y-1'}`}
+                                            onClick={() => { if (isInteractive) setActiveStatIndex(isActive ? null : index); }}
+                                        >
+                                            <div className={`mb-4 flex justify-between items-start`}>
+                                                <div className={colors[index]}><IconWrapper icon={icons[index]} size={24} /></div>
+                                                {isInteractive && !isActive && <span className="text-[10px] uppercase font-bold text-slate-500 bg-slate-700 px-2 py-0.5 rounded-full">View</span>}
+                                                {isInteractive && isActive && <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Close</span>}
+                                            </div>
+                                            {isActive && isInteractive ? (
+                                                <div className="animate-fadeIn">
+                                                    <div className="flex flex-col space-y-2 mb-2">
+                                                        {stat.details.map((detail, idx) => (
+                                                            <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-700/50 pb-1 last:border-0 last:pb-0">
+                                                                <span className="text-slate-300">{detail.name}</span>
+                                                                {detail.time && <span className="text-white font-bold">{detail.time}</span>}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <h3 className="text-4xl font-bold text-white mb-2">{stat.value}</h3>
+                                                    <p className="text-slate-400 text-sm font-medium uppercase tracking-wide">{stat.label}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </RevealOnScroll>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const About = ({ t }) => (
+            <section id="about" className="py-24 bg-slate-950">
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <RevealOnScroll>
+                        <h2 className="text-4xl font-bold text-white mb-6">{t.about.titlePrefix} <br /><span className="text-emerald-400">{t.about.titleSuffix}</span></h2>
+                        <p className="text-slate-400 text-lg leading-relaxed mb-6">{t.about.desc1}</p>
+                        <p className="text-slate-400 text-lg leading-relaxed mb-8">{t.about.desc2}</p>
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 text-emerald-400 font-bold">MBA</div>
+                            <div className="flex flex-col"><span className="text-white font-semibold">Sogang University</span><span className="text-slate-500 text-sm">Chemistry & Physics / MBA</span></div>
+                        </div>
+                    </RevealOnScroll>
+                    <RevealOnScroll delay={200}>
+                        <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
+                            <h3 className="text-xl font-bold text-white mb-6 relative z-10">{t.about.coreCompetenciesTitle}</h3>
+                            <div className="flex flex-wrap gap-3 relative z-10">
+                                {t.about.skills.map((skill, idx) => (
+                                    <span key={idx} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-medium border border-slate-700 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors cursor-default">{skill}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </RevealOnScroll>
+                </div>
+            </section>
+        );
+
+        const ExperienceCard = ({ role, company, period, description, achievements, isLast }) => (
+            <div className="relative pl-8 md:pl-0 md:grid md:grid-cols-12 gap-8 mb-16 group">
+                <div className={`hidden md:block absolute top-0 bottom-0 left-[50%] w-px bg-slate-800 transform -translate-x-1/2 ${isLast ? 'h-full' : ''}`}></div>
+                <div className="md:col-span-3 text-right hidden md:block pt-1 pr-8"><span className="text-emerald-400 font-mono text-sm tracking-wider">{period}</span></div>
+                <div className="absolute left-0 md:left-1/2 w-4 h-4 bg-slate-900 border-2 border-emerald-500 rounded-full transform md:-translate-x-1/2 mt-1.5 z-10 group-hover:bg-emerald-500 transition-colors"></div>
+                <div className="md:col-span-9 md:pl-8">
+                    <span className="md:hidden text-emerald-400 font-mono text-xs tracking-wider mb-2 block">{period}</span>
+                    <div className="bg-slate-900/80 p-6 rounded-xl border border-slate-800 hover:border-slate-600 transition-all shadow-lg backdrop-blur-sm">
+                        <h3 className="text-2xl font-bold text-white mb-1">{role}</h3>
+                        <h4 className="text-lg text-slate-400 mb-4 font-medium flex items-center gap-2">{company}</h4>
+                        <p className="text-slate-400 mb-6 leading-relaxed text-sm border-b border-slate-800 pb-4">{description}</p>
+                        <div className="space-y-3">
+                            <h5 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Key Achievements</h5>
+                            {achievements.map((item, idx) => (
+                                <div key={idx} className="flex items-start gap-3">
+                                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></div>
+                                    <p className="text-slate-300 text-sm leading-relaxed">{item}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Experience = ({ t }) => (
+            <section id="experience" className="py-24 bg-slate-950 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                <div className="absolute inset-0 bg-slate-950/90"></div>
+                <div className="max-w-4xl mx-auto px-6 relative z-10">
+                    <RevealOnScroll>
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl font-bold text-white mb-4">{t.experience.title}</h2>
+                            <div className="w-20 h-1 bg-emerald-500 mx-auto rounded-full"></div>
+                        </div>
+                    </RevealOnScroll>
+                    <div className="space-y-4">
+                        {t.experience.jobs.map((exp, index) => (
+                            <RevealOnScroll key={index} delay={index * 100}>
+                                <ExperienceCard {...exp} isLast={index === t.experience.jobs.length - 1} />
+                            </RevealOnScroll>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Education = ({ t }) => (
+            <section className="py-20 bg-slate-900 border-t border-slate-800">
+                <div className="max-w-6xl mx-auto px-6">
+                    <RevealOnScroll>
+                        <h2 className="text-3xl font-bold text-white mb-10 text-center flex items-center justify-center gap-3">
+                            <GraduationCap size={32} className="text-emerald-400" /> {t.education.title}
+                        </h2>
+                    </RevealOnScroll>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {t.education.items.map((item, idx) => (
+                            <RevealOnScroll key={idx} delay={(idx + 1) * 100}>
+                                <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 h-full">
+                                    <h3 className="text-emerald-400 font-semibold mb-2">{item.degree}</h3>
+                                    <p className="text-white text-lg font-bold">{item.school}</p>
+                                    <p className="text-slate-400 text-sm">{item.major}</p>
+                                    <p className="text-slate-500 text-xs mt-2">{item.period}</p>
+                                </div>
+                            </RevealOnScroll>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Contact = ({ t }) => (
+            <footer id="contact" className="bg-black py-20 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+                    <RevealOnScroll>
+                        <h2 className="text-5xl font-bold text-white mb-8 tracking-tight">{t.contact.title}</h2>
+                        <p className="text-slate-400 max-w-2xl mx-auto mb-12 text-lg">{t.contact.desc}</p>
+                    </RevealOnScroll>
+                    <div className="flex flex-col md:flex-row justify-center gap-8 mb-16">
+                        <RevealOnScroll delay={100}>
+                            <a href="mailto:lasvegas0310@gmail.com" className="flex items-center gap-4 p-6 bg-slate-900 rounded-2xl border border-slate-800 hover:border-emerald-500 transition-all group">
+                                <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><Mail size={24} /></div>
+                                <div className="text-left"><p className="text-slate-500 text-xs uppercase tracking-wider font-semibold">{t.contact.labels.email}</p><p className="text-white font-medium">lasvegas0310@gmail.com</p></div>
+                            </a>
+                        </RevealOnScroll>
+                        <RevealOnScroll delay={200}>
+                            <a href="tel:+821087224624" className="flex items-center gap-4 p-6 bg-slate-900 rounded-2xl border border-slate-800 hover:border-emerald-500 transition-all group">
+                                <div className="p-3 bg-blue-500/10 rounded-full text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors"><Phone size={24} /></div>
+                                <div className="text-left"><p className="text-slate-500 text-xs uppercase tracking-wider font-semibold">{t.contact.labels.phone}</p><p className="text-white font-medium">+82 10 8722 4624</p></div>
+                            </a>
+                        </RevealOnScroll>
+                        <RevealOnScroll delay={300}>
+                            <div className="flex items-center gap-4 p-6 bg-slate-900 rounded-2xl border border-slate-800 group cursor-default">
+                                <div className="p-3 bg-purple-500/10 rounded-full text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors"><MapPin size={24} /></div>
+                                <div className="text-left"><p className="text-slate-500 text-xs uppercase tracking-wider font-semibold">{t.contact.labels.location}</p><p className="text-white font-medium">Seoul, Korea</p></div>
+                            </div>
+                        </RevealOnScroll>
+                    </div>
+                    <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-slate-600 text-sm">© 2025 Woosik Jung. All rights reserved.</p>
+                        <div className="flex gap-6"><a href="#" className="text-slate-600 hover:text-white transition-colors"><Globe size={20} /></a></div>
+                    </div>
+                </div>
+            </footer>
+        );
+
+        const App = () => {
+            const [lang, setLang] = useState('en');
+            const t = translations[lang];
+            return (
+                <div className="bg-slate-950 min-h-screen text-slate-200 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
+                    <Navbar lang={lang} setLang={setLang} t={t} />
+                    <Hero t={t} />
+                    <Stats t={t} />
+                    <About t={t} />
+                    <Experience t={t} />
+                    <Education t={t} />
+                    <Contact t={t} />
+                    <GeminiChat />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
